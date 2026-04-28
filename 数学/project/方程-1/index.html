@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方程小课堂 - 四年级数学</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="stars-bg" id="starsBg"></div>
+
+  <header>
+    <h1>⚖️ 方程小课堂</h1>
+    <p class="subtitle">四年级 · 认识简单方程</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="learn">📖 学习</button>
+    <button class="tab" data-tab="practice">✏️ 练习</button>
+    <button class="tab" data-tab="challenge">🏆 挑战</button>
+  </nav>
+
+  <!-- ==================== 学习模式 ==================== -->
+  <main id="learnPanel" class="panel active">
+    <div class="balance-scene">
+      <div class="balance-container" id="balanceContainer">
+        <div class="beam" id="beam">
+          <div class="pan pan-left" id="panLeft">
+            <div class="pan-content" id="leftContent">
+              <span class="pan-label">x + 3</span>
+            </div>
+          </div>
+          <div class="pan pan-right" id="panRight">
+            <div class="pan-content" id="rightContent">
+              <span class="pan-label">7</span>
+            </div>
+          </div>
+        </div>
+        <div class="fulcrum"></div>
+      </div>
+    </div>
+
+    <div class="equation-display" id="equationDisplay">
+      <span class="eq-left" id="eqLeft">x + 3</span>
+      <span class="eq-sign">=</span>
+      <span class="eq-right" id="eqRight">7</span>
+    </div>
+
+    <div class="learn-message" id="learnMessage">
+      💡 等号就像天平，两边必须相等！
+    </div>
+
+    <div class="operation-area">
+      <div class="operation-buttons" id="opButtons">
+        <button class="op-btn add" data-op="add" data-val="1">+1</button>
+        <button class="op-btn add" data-op="add" data-val="3">+3</button>
+        <button class="op-btn sub" data-op="sub" data-val="1">−1</button>
+        <button class="op-btn sub" data-op="sub" data-val="3">−3</button>
+        <button class="op-btn" data-op="reset">🔄 重置</button>
+      </div>
+      <div class="step-buttons">
+        <button class="step-btn" id="hintBtn">💡 提示</button>
+        <button class="step-btn primary" id="nextEqBtn">下一题 ▶</button>
+      </div>
+    </div>
+
+    <div class="solution-area" id="solutionArea" style="display:none;">
+      <div class="solution-box">
+        <span class="sol-label">x = ?  请输入答案:</span>
+        <input type="number" id="answerInput" placeholder="?">
+        <button class="sol-btn" id="checkBtn">✅ 检查</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </main>
+
+  <!-- ==================== 练习模式 ==================== -->
+  <main id="practicePanel" class="panel">
+    <div class="practice-header">
+      <div class="score-display">⭐ <span id="practiceScore">0</span></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="question-count"><span id="qCurrent">1</span> / <span id="qTotal">10</span></div>
+    </div>
+
+    <div class="practice-card" id="practiceCard">
+      <div class="practice-equation" id="practiceEq"></div>
+      <div class="answer-row">
+        <label>x = </label>
+        <input type="number" id="practiceInput" placeholder="?">
+        <button class="submit-btn" id="practiceSubmit">提交 ✨</button>
+      </div>
+      <div class="practice-feedback" id="practiceFeedback"></div>
+      <div class="practice-hint" id="practiceHint"></div>
+    </div>
+
+    <div class="practice-result" id="practiceResult" style="display:none;">
+      <div class="result-emoji" id="resultEmoji"></div>
+      <div class="result-text" id="resultText"></div>
+      <button class="restart-btn" id="practiceRestart">🔄 再来一轮</button>
+    </div>
+  </main>
+
+  <!-- ==================== 挑战模式 ==================== -->
+  <main id="challengePanel" class="panel">
+    <div class="challenge-header">
+      <div class="timer" id="timer">⏱ 60</div>
+      <div class="challenge-score">⭐ <span id="challengeScore">0</span></div>
+      <div class="streak" id="streak">🔥 <span>0</span></div>
+    </div>
+
+    <div class="challenge-card" id="challengeCard">
+      <div class="challenge-equation" id="challengeEq"></div>
+      <div class="challenge-answer-row">
+        <label>x = </label>
+        <input type="number" id="challengeInput" placeholder="?">
+        <button class="challenge-submit-btn" id="challengeSubmit">↩ 提交</button>
+      </div>
+      <div class="challenge-feedback" id="challengeFeedback"></div>
+    </div>
+
+    <div class="challenge-result" id="challengeResult" style="display:none;">
+      <div class="result-emoji" id="challengeResultEmoji"></div>
+      <div class="result-text" id="challengeResultText"></div>
+      <button class="restart-btn" id="challengeRestart">🔄 再来一次</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>教育工具集 · 让学习变得有趣 🎓</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方程探险家 - 四年级数学</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-bubbles" id="bgBubbles"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">🚀 方程探险家</div>
+      <p class="subtitle">四年级 · 方程基础探索</p>
+      <div class="progress-row">
+        <div class="xp-bar-wrap"><div class="xp-bar" id="xpBar"></div></div>
+        <span class="xp-label" id="xpLabel">0 XP</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="intro">🌟 认识方程</button>
+    <button class="tab" data-tab="balance">⚖️ 天平实验室</button>
+    <button class="tab" data-tab="solve">🔍 解方程</button>
+    <button class="tab" data-tab="challenge">🏆 闯关挑战</button>
+  </nav>
+
+  <!-- ==================== 认识方程 ==================== -->
+  <section id="introPanel" class="panel active">
+    <div class="intro-stage">
+      <div class="story-box" id="storyBox">
+        <div class="story-character" id="storyChar">🧙‍♂️</div>
+        <div class="speech-bubble" id="speechBubble">
+          <p id="speechText">你好！我是方程向导！方程就像一个<strong>谜题</strong>，里面有一个未知数 <strong>x</strong>，我们的任务就是找到它！</p>
+        </div>
+      </div>
+
+      <div class="concept-cards" id="conceptCards">
+        <!-- 卡片由 JS 动态生成 -->
+      </div>
+
+      <div class="story-nav">
+        <button class="nav-btn" id="prevStoryBtn" disabled>◀ 上一步</button>
+        <div class="story-dots" id="storyDots"></div>
+        <button class="nav-btn primary" id="nextStoryBtn">下一步 ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 天平实验室 ==================== -->
+  <section id="balancePanel" class="panel">
+    <div class="lab-header">
+      <h2>⚖️ 天平实验室</h2>
+      <p class="lab-desc">用天平理解方程——两边保持相等，就像等号两侧！</p>
+    </div>
+
+    <div class="balance-scene">
+      <div class="balance-wrap" id="balanceWrap">
+        <div class="balance-beam" id="balanceBeam">
+          <div class="pan left-pan" id="leftPan">
+            <div class="pan-items" id="leftItems"></div>
+            <div class="pan-plate"></div>
+          </div>
+          <div class="pan right-pan" id="rightPan">
+            <div class="pan-items" id="rightItems"></div>
+            <div class="pan-plate"></div>
+          </div>
+        </div>
+        <div class="fulcrum-pole"></div>
+        <div class="fulcrum-base"></div>
+      </div>
+
+      <div class="balance-status" id="balanceStatus">⚖️ 天平平衡</div>
+    </div>
+
+    <div class="equation-show">
+      <div class="eq-box" id="eqBox">
+        <span class="eq-part left-eq" id="labEqLeft">x + 2</span>
+        <span class="eq-equals">=</span>
+        <span class="eq-part right-eq" id="labEqRight">5</span>
+      </div>
+    </div>
+
+    <div class="lab-controls">
+      <div class="op-group">
+        <p class="op-title">对两边同时操作：</p>
+        <div class="op-row">
+          <button class="op-btn plus" data-op="+1">两边 +1</button>
+          <button class="op-btn plus" data-op="+2">两边 +2</button>
+          <button class="op-btn minus" data-op="-1">两边 −1</button>
+          <button class="op-btn minus" data-op="-2">两边 −2</button>
+        </div>
+      </div>
+      <div class="lab-actions">
+        <button class="action-btn hint-btn" id="labHintBtn">💡 提示</button>
+        <button class="action-btn next-btn" id="labNextBtn">下一题 ▶</button>
+        <button class="action-btn reset-btn" id="labResetBtn">🔄 重置</button>
+      </div>
+    </div>
+
+    <div class="hint-box" id="labHintBox" style="display:none;"></div>
+
+    <div class="answer-row" id="labAnswerRow">
+      <span>你发现 x = </span>
+      <input type="number" id="labAnswerInput" class="answer-input" placeholder="?">
+      <button class="check-btn" id="labCheckBtn">✅ 确认</button>
+      <div class="check-feedback" id="labFeedback"></div>
+    </div>
+  </section>
+
+  <!-- ==================== 解方程 ==================== -->
+  <section id="solvePanel" class="panel">
+    <div class="solve-header">
+      <h2>🔍 解方程练习</h2>
+      <div class="solve-stats">
+        <span>⭐ <b id="solveScore">0</b></span>
+        <span>✅ <b id="solveCorrect">0</b></span>
+        <span>❌ <b id="solveWrong">0</b></span>
+      </div>
+    </div>
+
+    <div class="level-selector" id="levelSelector">
+      <button class="level-btn active" data-level="1">⭐ 初级<br><small>加减法方程</small></button>
+      <button class="level-btn" data-level="2">⭐⭐ 中级<br><small>乘除法方程</small></button>
+      <button class="level-btn" data-level="3">⭐⭐⭐ 高级<br><small>综合方程</small></button>
+    </div>
+
+    <div class="solve-card" id="solveCard">
+      <div class="solve-progress-bar"><div class="solve-progress-fill" id="solveFill"></div></div>
+      <div class="solve-num">第 <span id="solveNum">1</span> / <span id="solveTotal">5</span> 题</div>
+
+      <div class="solve-equation" id="solveEquation">x + 4 = 9</div>
+
+      <div class="solve-steps" id="solveSteps">
+        <!-- 步骤动画 -->
+      </div>
+
+      <div class="solve-input-row">
+        <span class="solve-x-label">x =</span>
+        <input type="number" id="solveInput" class="solve-input" placeholder="输入答案">
+        <button class="submit-btn" id="solveSubmitBtn">提交</button>
+      </div>
+
+      <div class="solve-feedback" id="solveFeedback"></div>
+
+      <div class="solve-actions">
+        <button class="action-btn hint-btn" id="solveHintBtn">💡 提示</button>
+        <button class="action-btn next-btn" id="solveNextBtn" style="display:none;">下一题 ▶</button>
+      </div>
+    </div>
+
+    <div class="solve-complete" id="solveComplete" style="display:none;">
+      <div class="complete-icon">🎉</div>
+      <h3>本组完成！</h3>
+      <p>得分：<b id="completeFinalScore">0</b> 分</p>
+      <button class="restart-btn" id="solveRestartBtn">再来一组 🔄</button>
+    </div>
+  </section>
+
+  <!-- ==================== 闯关挑战 ==================== -->
+  <section id="challengePanel" class="panel">
+    <div class="challenge-header">
+      <h2>🏆 闯关挑战</h2>
+      <p>限时答题，比比谁最快！</p>
+    </div>
+
+    <div class="challenge-start" id="challengeStart">
+      <div class="challenge-rules">
+        <div class="rule-item">⏱️ 每题限时 <b>15秒</b></div>
+        <div class="rule-item">✅ 答对 +10分</div>
+        <div class="rule-item">❌ 答错 −3分</div>
+        <div class="rule-item">🔥 连续答对有加成！</div>
+      </div>
+      <button class="start-btn" id="startChallengeBtn">开始挑战 🚀</button>
+    </div>
+
+    <div class="challenge-game" id="challengeGame" style="display:none;">
+      <div class="challenge-hud">
+        <div class="hud-item">🏆 <span id="cScore">0</span></div>
+        <div class="hud-item timer-box">
+          <div class="timer-ring">
+            <svg viewBox="0 0 44 44">
+              <circle class="timer-bg" cx="22" cy="22" r="18"/>
+              <circle class="timer-fill" id="timerCircle" cx="22" cy="22" r="18" stroke-dasharray="113" stroke-dashoffset="0"/>
+            </svg>
+            <span class="timer-num" id="timerNum">15</span>
+          </div>
+        </div>
+        <div class="hud-item">🔥 ×<span id="cCombo">1</span></div>
+      </div>
+
+      <div class="c-question-wrap">
+        <div class="c-equation" id="cEquation">x + 3 = 7</div>
+        <div class="c-options" id="cOptions"></div>
+      </div>
+
+      <div class="c-feedback" id="cFeedback"></div>
+    </div>
+
+    <div class="challenge-result" id="challengeResult" style="display:none;">
+      <div class="result-trophy">🏆</div>
+      <h3>挑战结束！</h3>
+      <div class="result-stats">
+        <div class="stat-box"><b id="rScore">0</b><span>总分</span></div>
+        <div class="stat-box"><b id="rCorrect">0</b><span>答对</span></div>
+        <div class="stat-box"><b id="rMaxCombo">0</b><span>最高连击</span></div>
+      </div>
+      <div class="rank-display" id="rankDisplay"></div>
+      <button class="start-btn" id="retryChallengeBtn">再战一次 🔄</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

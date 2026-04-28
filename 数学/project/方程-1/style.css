@@ -1,0 +1,605 @@
+/* ===== 基础样式 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #6366f1;
+  --primary-light: #a5b4fc;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 50%, #fdf2f8 100%);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ===== 星空背景 ===== */
+.stars-bg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background: var(--primary-light);
+  border-radius: 50%;
+  animation: twinkle var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
+  opacity: 0;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.6; transform: scale(1); }
+}
+
+/* ===== 头部 ===== */
+header {
+  text-align: center;
+  padding: 28px 20px 12px;
+  position: relative;
+  z-index: 1;
+}
+
+header h1 {
+  font-size: 2.4em;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+header .subtitle {
+  color: var(--text-light);
+  font-size: 1em;
+}
+
+/* ===== 标签页导航 ===== */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.tab {
+  padding: 10px 28px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background: var(--card);
+  font-size: 1.05em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.tab:hover {
+  border-color: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ===== 面板 ===== */
+.panel {
+  display: none;
+  max-width: 720px;
+  margin: 0 auto 40px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.panel.active {
+  display: block;
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 天平场景 ===== */
+.balance-scene {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 16px;
+}
+
+.balance-container {
+  position: relative;
+  width: 320px;
+  height: 260px;
+}
+
+.fulcrum {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 50px solid #94a3b8;
+  z-index: 0;
+}
+
+.beam {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  width: 280px;
+  height: 8px;
+  background: linear-gradient(90deg, #cbd5e1, #64748b, #cbd5e1);
+  border-radius: 4px;
+  transform-origin: center center;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.pan {
+  position: absolute;
+  bottom: 0;
+  width: 100px;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pan-left {
+  left: -110px;
+}
+
+.pan-right {
+  right: -110px;
+}
+
+.pan-content {
+  background: linear-gradient(145deg, #ffffff, #f1f5f9);
+  border: 3px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.5s ease;
+  position: relative;
+}
+
+.pan-content::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 14px;
+  background: #94a3b8;
+}
+
+.pan-label {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* 天平倾斜动画 */
+.beam.left-heavy { transform: rotate(-8deg); }
+.beam.right-heavy { transform: rotate(8deg); }
+.beam.balanced { transform: rotate(0deg); }
+
+.pan.left-heavy { transform: translateY(8px); }
+.pan.right-heavy { transform: translateY(8px); }
+
+/* ===== 方程显示 ===== */
+.equation-display {
+  text-align: center;
+  padding: 20px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  font-size: 1.6em;
+  font-weight: 700;
+}
+
+.eq-left, .eq-right { display: inline; }
+.eq-sign {
+  display: inline;
+  color: var(--primary);
+  margin: 0 12px;
+  font-size: 1.2em;
+}
+
+/* ===== 学习提示信息 ===== */
+.learn-message {
+  text-align: center;
+  padding: 14px 20px;
+  background: #fef3c7;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  font-size: 1.05em;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  animation: pulseHint 2s ease-in-out infinite;
+}
+
+@keyframes pulseHint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+}
+
+/* ===== 操作按钮区 ===== */
+.operation-area {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.operation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.op-btn {
+  padding: 10px 18px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background: white;
+  font-size: 1.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.op-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.op-btn.add { border-color: #22c55e; color: #16a34a; }
+.op-btn.add:hover { background: #f0fdf4; }
+.op-btn.sub { border-color: #f59e0b; color: #d97706; }
+.op-btn.sub:hover { background: #fffbeb; }
+
+.op-btn:active {
+  transform: scale(0.95);
+}
+
+.step-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.step-btn {
+  padding: 10px 24px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.step-btn:hover { transform: translateY(-2px); }
+.step-btn.primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ===== 答案区 ===== */
+.solution-area {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  text-align: center;
+  animation: fadeInUp 0.5s ease;
+}
+
+.solution-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.sol-label {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.solution-box input {
+  width: 100px;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  font-size: 1.2em;
+  text-align: center;
+  font-weight: 700;
+  transition: border-color 0.2s;
+}
+
+.solution-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.sol-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 50px;
+  background: var(--success);
+  color: white;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sol-btn:hover { transform: scale(1.05); }
+
+.feedback {
+  margin-top: 12px;
+  font-size: 1.15em;
+  font-weight: 600;
+  min-height: 28px;
+}
+
+.feedback.correct { color: var(--success); }
+.feedback.wrong { color: var(--danger); }
+
+/* ===== 练习模式 ===== */
+.practice-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.score-display {
+  font-size: 1.3em;
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #ec4899);
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0%;
+}
+
+.question-count {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.practice-card, .challenge-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  text-align: center;
+}
+
+.practice-equation, .challenge-equation {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 24px;
+  animation: fadeInUp 0.4s ease;
+}
+
+.answer-row, .challenge-answer-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.answer-row input, .challenge-answer-row input {
+  width: 100px;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  font-size: 1.1em;
+  text-align: center;
+  font-weight: 700;
+  transition: border-color 0.2s;
+}
+
+.answer-row input:focus, .challenge-answer-row input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.submit-btn, .challenge-submit-btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 50px;
+  background: var(--primary);
+  color: white;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover, .challenge-submit-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(99,102,241,0.4); }
+.submit-btn:active, .challenge-submit-btn:active { transform: scale(0.95); }
+
+.practice-feedback, .challenge-feedback {
+  margin-top: 16px;
+  font-size: 1.2em;
+  font-weight: 600;
+  min-height: 30px;
+  transition: all 0.3s;
+}
+
+.practice-feedback.correct, .challenge-feedback.correct { color: var(--success); }
+.practice-feedback.wrong, .challenge-feedback.wrong { color: var(--danger); }
+
+.practice-hint {
+  margin-top: 12px;
+  color: var(--text-light);
+  font-size: 0.95em;
+  min-height: 22px;
+}
+
+/* ===== 结果展示 ===== */
+.practice-result, .challenge-result {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px;
+  text-align: center;
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% { opacity:0; transform:scale(0.3); }
+  50% { opacity:1; transform:scale(1.05); }
+  70% { transform:scale(0.9); }
+  100% { transform:scale(1); }
+}
+
+.result-emoji {
+  font-size: 4em;
+  margin-bottom: 12px;
+}
+
+.result-text {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.restart-btn {
+  padding: 12px 32px;
+  border: 2px solid var(--primary);
+  border-radius: 50px;
+  background: white;
+  color: var(--primary);
+  font-size: 1.05em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.restart-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== 挑战模式 ===== */
+.challenge-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.timer {
+  color: var(--danger);
+}
+
+.timer.urgent {
+  animation: urgentPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.streak {
+  color: var(--warning);
+}
+
+/* ===== 撒花效果 ===== */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall var(--fall-dur) linear forwards;
+  z-index: 100;
+  pointer-events: none;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--rot)); opacity: 0; }
+}
+
+/* ===== 页脚 ===== */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-light);
+  font-size: 0.9em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 600px) {
+  header h1 { font-size: 1.6em; }
+  .balance-container { transform: scale(0.75); }
+  .tab { padding: 8px 16px; font-size: 0.9em; }
+  .equation-display { font-size: 1.2em; }
+  .practice-equation, .challenge-equation { font-size: 1.4em; }
+}
