@@ -60,10 +60,19 @@ def _set_row_height(row, mm: float):
 
 def _fmt(n: float) -> str:
     """把浮点数格式化为最简小数字符串，至少保留 1 位小数"""
-    s = f"{n:.2f}".rstrip('0')
+    s = f"{n:.3f}".rstrip('0')
     if s.endswith('.'):
         s += '0'
     return s
+
+
+def _fmt_num(n) -> str:
+    """格式化数字：整数显示为整数，小数使用 _fmt"""
+    if isinstance(n, int):
+        return str(n)
+    if float(n) == int(float(n)):
+        return str(int(float(n)))
+    return _fmt(float(n))
 
 
 # ──────────────────────────── 题目生成 ────────────────────────────
@@ -105,42 +114,100 @@ def generate_problems(n: int = 50):
     return problems
 
 
+def generate_mul_div_problems(n: int = 50):
+    """生成 n 道小数 ×/÷ 10/100/1000 题目"""
+    FACTORS = [10, 100, 1000]
+    seen: set = set()
+    problems = []
+    attempts = 0
+
+    while len(problems) < n and attempts < n * 40:
+        attempts += 1
+        factor = random.choice(FACTORS)
+        op = random.choice(['×', '÷'])
+
+        if op == '×':
+            # a × factor：a 为 1~2 位小数，结果 ≤ 9999
+            dp = random.choice([1, 2])
+            max_val = int(min(99.99, 9999 / factor) * 10 ** dp)
+            if max_val < 1:
+                continue
+            val = random.randint(1, max_val)
+            if dp == 2 and val % 10 == 0:   # 避免末位 0 退化成 1 位
+                continue
+            a = round(val / 10 ** dp, dp)
+            b = factor
+        else:
+            # a ÷ factor：保证结果小数位 ≤ 3，且结果 ≥ 0.001
+            if factor == 1000:
+                # 整数 ÷ 1000，结果有 3 位小数
+                a = float(random.randint(1, 9999))
+            elif factor == 100:
+                # 整数或 1 位小数 ÷ 100
+                if random.random() < 0.6:
+                    a = float(random.randint(1, 9999))
+                else:
+                    val = random.randint(11, 999)
+                    if val % 10 == 0:
+                        continue
+                    a = round(val / 10, 1)
+            else:  # factor == 10
+                # 整数、1 位或 2 位小数 ÷ 10
+                dp_a = random.choice([0, 1, 2])
+                if dp_a == 0:
+                    a = float(random.randint(1, 999))
+                elif dp_a == 1:
+                    a = round(random.randint(1, 99) / 10, 1)
+                else:
+                    val = random.randint(11, 99)
+                    if val % 10 == 0:
+                        continue
+                    a = round(val / 100, 2)
+            b = factor
+            if a / b < 0.001:
+                continue
+
+        key = (a, op, b)
+        if key in seen:
+            continue
+        seen.add(key)
+        problems.append((a, op, b))
+
+    return problems
+
+
 # ──────────────────────────── 文档生成 ────────────────────────────
 
-def build_docx(problems: list, output_path: str):
-    doc = Document()
-
-    # ── A4 页面，窄边距，最大利用空间 ──────────────────────────────
-    sec = doc.sections[0]
-    sec.page_height    = Mm(297)
-    sec.page_width     = Mm(210)
-    sec.left_margin    = Mm(15)
-    sec.right_margin   = Mm(15)
-    sec.top_margin     = Mm(12)
-    sec.bottom_margin  = Mm(10)
-
-    # ── 标题 ──────────────────────────────────────────────────────
+def _add_section_title(doc, title: str):
+    """添加分节标题"""
     tp = doc.add_paragraph()
     tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     tp.paragraph_format.space_before = Pt(0)
     tp.paragraph_format.space_after  = Pt(3)
-    r = tp.add_run("小数加减法计算练习（50题）")
+    r = tp.add_run(title)
     r.bold = True
     r.font.size = Pt(16)
 
-    # ── 姓名 / 日期 / 得分 ────────────────────────────────────────
+
+def _add_info_row(doc):
+    """添加姓名/日期/得分行"""
     ip = doc.add_paragraph()
     ip.paragraph_format.space_before = Pt(0)
     ip.paragraph_format.space_after  = Pt(5)
     today = datetime.date.today().strftime('%Y年%m月%d日')
-    ir = ip.add_run(f"姓名：_______________   日期：{today}   用时：_______分_______秒   得分：_______分")
+    ir = ip.add_run(
+        f"姓名：_______________   日期：{today}   "
+        f"用时：_______分_______秒   得分：_______分"
+    )
     ir.font.size = Pt(10)
 
-    # ── 题目表格：2 列 × 25 行 ────────────────────────────────────
+
+def _add_problems_table(doc, problems: list, start_num: int = 1):
+    """在 doc 末尾追加一张 2 列 × 25 行的题目表格"""
     COLS     = 2
     ROWS     = 25
-    ROW_H_MM = 9.8          # 行高（可微调）
-    COL_W    = Mm(88)       # 每列 88 mm，合计 176 mm（页面可用 180 mm）
+    ROW_H_MM = 9.8
+    COL_W    = Mm(88)
 
     tbl = doc.add_table(rows=ROWS, cols=COLS)
     _remove_table_borders(tbl)
@@ -161,19 +228,50 @@ def build_docx(problems: list, output_path: str):
             if idx < len(problems):
                 a, op, b = problems[idx]
 
-                # 序号（加粗）
-                r_num = p.add_run(f"({idx + 1:>2})")
+                r_num = p.add_run(f"({start_num + idx:>2})")
                 r_num.bold = True
                 r_num.font.size = Pt(11)
 
-                # 算式
-                expr = f"  {_fmt(a)} {op} {_fmt(b)} = "
+                expr = f"  {_fmt_num(a)} {op} {_fmt_num(b)} = "
                 r_expr = p.add_run(expr)
                 r_expr.font.size = Pt(11.5)
 
-                # 答题横线
                 r_ans = p.add_run("___________")
                 r_ans.font.size = Pt(11)
+
+
+def build_docx(problems: list, output_path: str, mul_div_problems: list = None):
+    doc = Document()
+
+    # ── A4 页面，窄边距，最大利用空间 ──────────────────────────────
+    sec = doc.sections[0]
+    sec.page_height    = Mm(297)
+    sec.page_width     = Mm(210)
+    sec.left_margin    = Mm(15)
+    sec.right_margin   = Mm(15)
+    sec.top_margin     = Mm(12)
+    sec.bottom_margin  = Mm(10)
+
+    # ── 第一节：加减法 ───────────────────────────────────────────
+    _add_section_title(doc, "小数加减法计算练习（50题）")
+    _add_info_row(doc)
+    _add_problems_table(doc, problems, start_num=1)
+
+    # ── 第二节：乘除法 ───────────────────────────────────────────
+    if mul_div_problems:
+        # 分页
+        last_p = doc.add_paragraph()
+        last_p.paragraph_format.space_before = Pt(0)
+        last_p.paragraph_format.space_after  = Pt(0)
+        from docx.oxml import OxmlElement as _OE
+        run = last_p.add_run()
+        br = _OE('w:br')
+        br.set(qn('w:type'), 'page')
+        run._r.append(br)
+
+        _add_section_title(doc, "小数乘除法计算练习（50题）")
+        _add_info_row(doc)
+        _add_problems_table(doc, mul_div_problems, start_num=1)
 
     doc.save(output_path)
 
@@ -181,15 +279,20 @@ def build_docx(problems: list, output_path: str):
 # ──────────────────────────── 主程序 ────────────────────────────
 
 def main():
-    problems = generate_problems(50)
+    add_sub = generate_problems(25)
+    mul_div = generate_mul_div_problems(25)
+    # 混合后打乱顺序，避免前半全是加减、后半全是乘除
+    import random as _r
+    problems = add_sub + mul_div
+    _r.shuffle(problems)
 
     today       = datetime.date.today().strftime('%Y%m%d')
-    output_path = f"d:/workspace/edu/小数加减法练习_{today}.docx"
+    output_path = f"d:/workspace/edu/小数计算练习_{today}.docx"
 
     build_docx(problems, output_path)
 
     print(f"✓ 文件已生成：{output_path}")
-    print(f"  共 {len(problems)} 道题，包含 1~2 位小数的加减法")
+    print(f"  共 {len(problems)} 道题：{len(add_sub)} 道加减法 + {len(mul_div)} 道乘除法（×/÷ 10/100/1000）")
     print("  用 Word / WPS 打开，选 A4 纸、实际大小打印即可。")
 
 
