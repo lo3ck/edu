@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天平学方程 - 互动教程</title>
+<style>
+:root {
+  --bg: #FFF8EC;
+  --blue: #5B9BD5;
+  --blue-dark: #3A7CC3;
+  --orange: #F4A460;
+  --orange-dark: #D4893E;
+  --green: #6BBF59;
+  --red: #E05555;
+  --text: #3D3027;
+  --text-light: #6B5E52;
+  --card: #FFFFFF;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+  --radius: 16px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  background: linear-gradient(135deg, #FFF8EC 0%, #FFE8CC 50%, #FFF0DD 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.header .icon { font-size: 42px; animation: bounce 2s ease-in-out infinite; }
+.header h1 { font-size: 28px; color: var(--text); font-weight: 700; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Hint bar */
+.hint-bar {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--text-light);
+  box-shadow: var(--shadow);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+.hint-bar.success { background: #E8F5E0; color: #3D7A2F; font-weight: 600; }
+
+/* Equation display */
+.equation-display {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 30px;
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-family: 'Courier New', 'Source Code Pro', monospace;
+  user-select: none;
+}
+.equation-display .x-term { color: var(--blue-dark); }
+.equation-display .eq-sign {
+  color: var(--orange-dark);
+  margin: 0 8px;
+  position: relative;
+}
+.equation-display .eq-sign::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  height: 3px;
+  background: var(--orange-dark);
+  border-radius: 2px;
+}
+.equation-display .num { color: var(--text); }
+
+/* Canvas */
+.canvas-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Operation buttons */
+.ops-section { display: flex; flex-direction: column; gap: 8px; }
+.ops-title { font-size: 15px; color: var(--text-light); font-weight: 600; padding-left: 4px; }
+.ops-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.op-btn {
+  padding: 16px 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: all 0.2s;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+.op-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+.op-btn:active { transform: scale(0.96); }
+.op-btn.hint-highlight {
+  background: #FFF3CD;
+  border: 3px solid #FFB800;
+  animation: pulse-hint 0.8s ease-in-out 3;
+}
+@keyframes pulse-hint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,184,0,0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(255,184,0,0); }
+}
+.op-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* Step history */
+.steps-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--shadow);
+  max-height: 160px;
+  overflow-y: auto;
+}
+.steps-title { font-size: 14px; color: var(--text-light); font-weight: 600; margin-bottom: 8px; }
+.step-item {
+  font-size: 15px;
+  color: var(--text);
+  padding: 6px 0;
+  border-bottom: 1px solid #F5F0E8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.step-num {
+  background: var(--blue);
+  color: #fff;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.step-arrow { color: var(--green); font-weight: 700; margin: 0 4px; }
+
+/* Action bar */
+.action-bar {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.action-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #E0D5C5;
+  border-radius: 12px;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.action-btn:hover { background: #F5F0E8; }
+.action-btn.primary {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.action-btn.primary:hover { background: #5AAB48; }
+
+/* Victory overlay */
+.victory-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+.victory-overlay.show { display: flex; }
+.victory-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.victory-emoji { font-size: 72px; animation: bounce 0.6s ease-in-out 3; }
+.victory-title { font-size: 28px; font-weight: 700; color: var(--text); margin: 12px 0; }
+.victory-answer { font-size: 42px; font-weight: 700; color: var(--blue-dark); margin: 8px 0 20px; }
+.victory-stars { font-size: 36px; margin: 8px 0; }
+.victory-btn {
+  padding: 14px 36px;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  background: var(--green);
+  color: #fff;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.victory-btn:hover { transform: scale(1.05); }
+
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 101;
+}
+.confetti-piece {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg) scale(1); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg) scale(0.5); opacity: 0; }
+}
+
+/* Progress dots */
+.progress-dots { display: flex; gap: 6px; justify-content: center; }
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #E0D5C5;
+  transition: all 0.3s;
+}
+.dot.active { background: var(--blue); transform: scale(1.3); }
+.dot.done { background: var(--green); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container { gap: 10px; }
+  .equation-display { font-size: 26px; padding: 14px 18px; }
+  .op-btn { font-size: 16px; padding: 12px 8px; }
+  .header h1 { font-size: 22px; }
+  .header .icon { font-size: 32px; }
+  .victory-card { padding: 24px 20px; margin: 0 16px; }
+  .victory-answer { font-size: 30px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <span class="icon">⚖️</span>
+    <h1>天平学方程</h1>
+  </div>
+
+  <!-- Hint / Guidance -->
+  <div class="hint-bar" id="hintBar">
+    💡 等式就像一个天平，两边必须保持平衡！
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-dots" id="progressDots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Equation display -->
+  <div class="equation-display" id="equationDisplay"></div>
+
+  <!-- Balance scale canvas -->
+  <div class="canvas-wrap">
+    <canvas id="scaleCanvas" width="700" height="350"></canvas>
+  </div>
+
+  <!-- Operation buttons -->
+  <div class="ops-section">
+    <div class="ops-title">🤔 选择正确的操作（两边同时进行）：</div>
+    <div class="ops-grid" id="opsGrid"></div>
+  </div>
+
+  <!-- Step history -->
+  <div class="steps-section">
+    <div class="steps-title">📝 解题步骤：</div>
+    <div id="stepsList"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-bar">
+    <button class="action-btn" id="btnHint" title="给我提示">💡 提示</button>
+    <button class="action-btn" id="btnReset" title="重新做这道题">🔄 重置</button>
+    <button class="action-btn primary" id="btnNext" title="换一道新题">🎲 换一题</button>
+  </div>
+</div>
+
+<!-- Victory overlay -->
+<div class="victory-overlay" id="victoryOverlay">
+  <div class="victory-card">
+    <div class="victory-emoji">🎉</div>
+    <div class="victory-title">太棒了！你解出来了！</div>
+    <div class="victory-stars" id="victoryStars">⭐⭐⭐</div>
+    <div class="victory-answer" id="victoryAnswer"></div>
+    <button class="victory-btn" id="btnVictoryNext">🎲 再来一题</button>
+  </div>
+</div>
+
+<!-- Confetti -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ============ EQUATION ENGINE ============
+
+class Equation {
+  constructor(leftX, leftConst, rightX, rightConst) {
+    this.left = { xCoeff: leftX, const: leftConst };
+    this.right = { xCoeff: rightX, const: rightConst };
+  }
+
+  clone() {
+    return new Equation(this.left.xCoeff, this.left.const, this.right.xCoeff, this.right.const);
+  }
+
+  addConstant(v) {
+    this.left.const += v;
+    this.right.const += v;
+  }
+
+  multiplyBy(v) {
+    this.left.xCoeff *= v;
+    this.left.const *= v;
+    this.right.xCoeff *= v;
+    this.right.const *= v;
+  }
+
+  divideBy(v) {
+    if (v === 0) return;
+    this.left.xCoeff /= v;
+    this.left.const /= v;
+    this.right.xCoeff /= v;
+    this.right.const /= v;
+  }
+
+  isSolved() {
+    // x isolated on left: 1·x + 0 = something (no x on right)
+    if (this.left.xCoeff === 1 && this.left.const === 0 && this.right.xCoeff === 0) {
+      return this.right.const;
+    }
+    // x isolated on right
+    if (this.right.xCoeff === 1 && this.right.const === 0 && this.left.xCoeff === 0) {
+      return this.left.const;
+    }
+    return null;
+  }
+
+  getDisplayHTML() {
+    const term = (coeff, c, isLeft) => {
+      let parts = [];
+      if (coeff !== 0) {
+        let label = '';
+        if (coeff === 1) label = 'x';
+        else if (coeff === -1) label = '-x';
+        else label = coeff + 'x';
+        parts.push(`<span class="x-term">${label}</span>`);
+      }
+      if (c !== 0) {
+        if (c > 0 && parts.length > 0) parts.push(' <span>+</span> ');
+        if (c < 0 && parts.length > 0) parts.push(' <span>−</span> ');
+        const absC = Math.abs(c);
+        parts.push(`<span class="num">${c < 0 && parts.length <= 1 ? '-' : ''}${absC}</span>`);
+      }
+      if (parts.length === 0) parts.push('<span class="num">0</span>');
+      return parts.join('');
+    };
+
+    const leftStr = term(this.left.xCoeff, this.left.const, true);
+    const rightStr = term(this.right.xCoeff, this.right.const, false);
+
+    return `${leftStr} <span class="eq-sign">=</span> ${rightStr}`;
+  }
+
+  // Get blocks for visual rendering
+  getBlocks(side) {
+    const s = side === 'left' ? this.left : this.right;
+    const blocks = [];
+    if (s.xCoeff !== 0) {
+      let label;
+      if (s.xCoeff === 1) label = 'x';
+      else if (s.xCoeff === -1) label = '-x';
+      else label = s.xCoeff + 'x';
+      blocks.push({ type: 'x', label, value: s.xCoeff });
+    }
+    if (s.const !== 0) {
+      blocks.push({ type: 'num', label: String(s.const), value: s.const });
+    }
+    return blocks;
+  }
+
+  // Get suggested next operation
+  getCorrectOperation() {
+    // Goal: isolate x on left side
+    // Step 1: eliminate constant on left side
+    if (this.left.const !== 0) {
+      const c = this.left.const;
+      return {
+        label: c > 0 ? `两边同时减 ${Math.abs(c)}` : `两边同时加 ${Math.abs(c)}`,
+        desc: c > 0 ? `减 ${Math.abs(c)}` : `加 ${Math.abs(c)}`,
+        apply: (eq) => eq.addConstant(-c),
+        type: 'eliminate-const',
+        value: Math.abs(c)
+      };
+    }
+    // Step 2: normalize x coefficient
+    if (this.left.xCoeff !== 1 && this.left.xCoeff !== 0) {
+      const c = this.left.xCoeff;
+      return {
+        label: `两边同时除以 ${Math.abs(c)}`,
+        desc: `除以 ${Math.abs(c)}`,
+        apply: (eq) => eq.divideBy(c),
+        type: 'normalize-coeff',
+        value: Math.abs(c)
+      };
+    }
+    return null; // Already solved
+  }
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateProblem() {
+  const answer = randInt(2, 9);
+  const type = randInt(1, 3);
+
+  switch (type) {
+    case 1: { // x + a = b
+      const a = randInt(1, 8);
+      const b = answer + a;
+      return { eq: new Equation(1, a, 0, b), answer, stepsNeeded: 1 };
+    }
+    case 2: { // ax = b
+      const a = randInt(2, 5);
+      const b = answer * a;
+      return { eq: new Equation(a, 0, 0, b), answer, stepsNeeded: 1 };
+    }
+    case 3: { // ax + b = c
+      const a = randInt(2, 4);
+      const b = randInt(1, 5);
+      const c = a * answer + b;
+      return { eq: new Equation(a, b, 0, c), answer, stepsNeeded: 2 };
+    }
+  }
+}
+
+function dividesEvenly(eq, divisor) {
+  if (divisor === 0 || divisor === 1) return false;
+  return Number.isInteger(eq.left.xCoeff / divisor) &&
+         Number.isInteger(eq.left.const / divisor) &&
+         Number.isInteger(eq.right.xCoeff / divisor) &&
+         Number.isInteger(eq.right.const / divisor);
+}
+
+function generateDistractors(correctOp, eq) {
+  const distractors = [];
+  const correctDesc = correctOp.desc;
+  const v = correctOp.value;
+  const altV = v === 1 ? 2 : (v === 2 ? 3 : 2);
+
+  if (correctOp.type === 'eliminate-const') {
+    // Opposite operation (add instead of subtract, or vice versa)
+    distractors.push({
+      label: `两边同时加 ${v}`,
+      desc: `加 ${v}`,
+      apply: (eq2) => eq2.addConstant(v)
+    });
+    // Multiply by altV (always produces integers)
+    distractors.push({
+      label: `两边同时乘 ${altV}`,
+      desc: `乘 ${altV}`,
+      apply: (eq2) => eq2.multiplyBy(altV)
+    });
+    // Divide by coefficient only if it produces integers
+    if (eq.left.xCoeff !== 0 && eq.left.xCoeff !== 1 && dividesEvenly(eq, eq.left.xCoeff)) {
+      distractors.push({
+        label: `两边同时除以 ${Math.abs(eq.left.xCoeff)}`,
+        desc: `除以 ${Math.abs(eq.left.xCoeff)}`,
+        apply: (eq2) => eq2.divideBy(eq.left.xCoeff)
+      });
+    }
+    // Add a different number as extra distractor
+    distractors.push({
+      label: `两边同时减 ${altV}`,
+      desc: `减 ${altV}`,
+      apply: (eq2) => eq2.addConstant(-altV)
+    });
+  } else if (correctOp.type === 'normalize-coeff') {
+    // Opposite: multiply instead of divide
+    distractors.push({
+      label: `两边同时乘 ${v}`,
+      desc: `乘 ${v}`,
+      apply: (eq2) => eq2.multiplyBy(v)
+    });
+    // Add/subtract (always produces integers)
+    distractors.push({
+      label: `两边同时加 ${altV}`,
+      desc: `加 ${altV}`,
+      apply: (eq2) => eq2.addConstant(altV)
+    });
+    distractors.push({
+      label: `两边同时减 ${altV}`,
+      desc: `减 ${altV}`,
+      apply: (eq2) => eq2.addConstant(-altV)
+    });
+    // Extra: multiply by a different number
+    distractors.push({
+      label: `两边同时乘 ${altV}`,
+      desc: `乘 ${altV}`,
+      apply: (eq2) => eq2.multiplyBy(altV)
+    });
+  }
+
+  // Remove duplicates by description and filter out the correct answer
+  const seen = new Set([correctDesc]);
+  const filtered = [];
+  for (const d of distractors) {
+    if (!seen.has(d.desc)) {
+      seen.add(d.desc);
+      filtered.push(d);
+    }
+  }
+
+  return filtered.slice(0, 3);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============ CANVAS RENDERER ============
+
+const canvas = document.getElementById('scaleCanvas');
+const ctx = canvas.getContext('2d');
+const W = 700, H = 350;
+const PIVOT_X = W / 2;
+const PIVOT_Y = 195;
+const BEAM_HALF = 210;
+const STRING_LEN = 75;
+const PAN_W = 110;
+
+let beamAngle = 0;
+let beamVelocity = 0;
+let lastOpTime = -1000;
+
+function kickBeam() {
+  const dir = (Math.random() - 0.5) > 0 ? 1 : -1;
+  beamVelocity = dir * 0.06;
+  lastOpTime = performance.now();
+}
+
+function updateBeam() {
+  const now = performance.now();
+  const dt = Math.min((now - lastOpTime) / 1000, 0.05);
+  lastOpTime = now;
+
+  const spring = 8;
+  const damping = 4;
+
+  const accel = -spring * beamAngle - damping * beamVelocity;
+  beamVelocity += accel * dt;
+  beamAngle += beamVelocity * dt;
+
+  if (Math.abs(beamAngle) < 0.0005 && Math.abs(beamVelocity) < 0.001) {
+    beamAngle = 0;
+    beamVelocity = 0;
+  }
+}
+
+function drawBase() {
+  // Pedestal
+  const bx = PIVOT_X;
+  const by = PIVOT_Y + 5;
+
+  ctx.fillStyle = '#C4956A';
+  ctx.beginPath();
+  ctx.moveTo(bx - 12, by + 2);
+  ctx.lineTo(bx + 12, by + 2);
+  ctx.lineTo(bx + 6, by + 45);
+  ctx.lineTo(bx - 6, by + 45);
+  ctx.closePath();
+  ctx.fill();
+
+  // Base platform
+  ctx.fillStyle = '#B8875A';
+  ctx.beginPath();
+  ctx.moveTo(bx - 50, by + 45);
+  ctx.lineTo(bx + 50, by + 45);
+  ctx.lineTo(bx + 55, by + 55);
+  ctx.lineTo(bx + 45, by + 65);
+  ctx.lineTo(bx - 45, by + 65);
+  ctx.lineTo(bx - 55, by + 55);
+  ctx.closePath();
+  ctx.fill();
+
+  // Pivot circle
+  ctx.fillStyle = '#8B6914';
+  ctx.beginPath();
+  ctx.arc(bx, by, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#D4A853';
+  ctx.beginPath();
+  ctx.arc(bx, by, 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function getBeamEndpoints() {
+  const cos = Math.cos(beamAngle);
+  const sin = Math.sin(beamAngle);
+  const leftX = PIVOT_X - BEAM_HALF * cos;
+  const leftY = PIVOT_Y - BEAM_HALF * sin;
+  const rightX = PIVOT_X + BEAM_HALF * cos;
+  const rightY = PIVOT_Y + BEAM_HALF * sin;
+  return { leftX, leftY, rightX, rightY };
+}
+
+function drawBeam(leftX, leftY, rightX, rightY) {
+  // Main beam
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = 8;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(leftX, leftY);
+  ctx.lineTo(rightX, rightY);
+  ctx.stroke();
+
+  // Beam highlight
+  ctx.strokeStyle = '#C4956A';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(leftX, leftY - 2);
+  ctx.lineTo(rightX, rightY - 2);
+  ctx.stroke();
+
+  // End caps
+  for (const [ex, ey] of [[leftX, leftY], [rightX, rightY]]) {
+    ctx.fillStyle = '#D4A853';
+    ctx.beginPath();
+    ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8B6914';
+    ctx.beginPath();
+    ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawPan(cx, panTopY) {
+  const topW = PAN_W;
+  const botW = PAN_W * 0.7;
+  const panH = 18;
+  const botY = panTopY + panH;
+
+  // Pan body
+  ctx.fillStyle = '#E8D5B0';
+  ctx.strokeStyle = '#C4956A';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - topW / 2, panTopY);
+  ctx.lineTo(cx - botW / 2, botY);
+  ctx.lineTo(cx + botW / 2, botY);
+  ctx.lineTo(cx + topW / 2, panTopY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Pan rim
+  ctx.strokeStyle = '#B8875A';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cx - topW / 2 - 4, panTopY);
+  ctx.lineTo(cx + topW / 2 + 4, panTopY);
+  ctx.stroke();
+}
+
+function drawString(cx, topY, botY) {
+  ctx.strokeStyle = '#A08060';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(cx - 15, topY + 2);
+  ctx.lineTo(cx - 15, botY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + 15, topY + 2);
+  ctx.lineTo(cx + 15, botY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawBlock(cx, cy, w, h, color, label) {
+  const r = 8;
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.beginPath();
+  ctx.roundRect(cx - w / 2 + 2, cy - h / 2 + 2, w, h, r);
+  ctx.fill();
+
+  // Block body
+  const grad = ctx.createLinearGradient(cx, cy - h / 2, cx, cy + h / 2);
+  grad.addColorStop(0, color);
+  grad.addColorStop(1, shadeColor(color, -20));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(cx - w / 2, cy - h / 2, w, h, r);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = shadeColor(color, -30);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(cx - w / 2, cy - h / 2, w, h, r);
+  ctx.stroke();
+
+  // Label
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 17px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, cx, cy + 1);
+}
+
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+  const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amt));
+  const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+  return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+}
+
+function drawBlocks(cx, panTopY, blocks) {
+  const blkW = 72;
+  const blkH = 34;
+  const gap = 5;
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const blkCY = panTopY - blkH / 2 - i * (blkH + gap);
+    const color = block.type === 'x' ? '#5B9BD5' : '#F4A460';
+    drawBlock(cx, blkCY, blkW, blkH, color, block.label);
+  }
+}
+
+function drawSideLabel(cx, panTopY, text) {
+  ctx.fillStyle = '#8B7B6B';
+  ctx.font = 'bold 14px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(text, cx, panTopY + 30);
+}
+
+function renderScale(equation) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Sky gradient background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, '#FFFDF7');
+  bgGrad.addColorStop(1, '#FFF5E6');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  drawBase();
+
+  const { leftX, leftY, rightX, rightY } = getBeamEndpoints();
+  drawBeam(leftX, leftY, rightX, rightY);
+
+  // Left side (x terms + constants)
+  const leftPanY = leftY + STRING_LEN;
+  drawString(leftX, leftY, leftPanY);
+  drawPan(leftX, leftPanY);
+  const leftBlocks = equation.getBlocks('left');
+  drawBlocks(leftX, leftPanY, leftBlocks);
+  drawSideLabel(leftX, leftPanY, '左边');
+
+  // Right side (result)
+  const rightPanY = rightY + STRING_LEN;
+  drawString(rightX, rightY, rightPanY);
+  drawPan(rightX, rightPanY);
+  const rightBlocks = equation.getBlocks('right');
+  drawBlocks(rightX, rightPanY, rightBlocks);
+  drawSideLabel(rightX, rightPanY, '右边');
+
+  // Decorative math symbols
+  ctx.fillStyle = '#E8D5B0';
+  ctx.font = '60px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('+ − × ÷', PIVOT_X, 40);
+}
+
+// ============ GAME STATE ============
+
+let currentProblem = null;
+let currentEquation = null;
+let steps = [];
+let operations = [];
+let hintUsed = 0;
+let solved = false;
+
+function resetState() {
+  steps = [];
+  operations = [];
+  hintUsed = 0;
+  solved = false;
+}
+
+function loadProblem() {
+  resetState();
+  currentProblem = generateProblem();
+  currentEquation = currentProblem.eq.clone();
+
+  updateProgressDots();
+  updateEquationDisplay();
+  updateOpsGrid();
+  updateStepsList();
+  updateHintBar('💡 等式就像一个天平，两边必须保持平衡！请选择一个操作');
+  renderScale(currentEquation);
+
+  document.getElementById('victoryOverlay').classList.remove('show');
+  document.getElementById('btnNext').style.display = 'block';
+}
+
+function updateProgressDots() {
+  const container = document.getElementById('progressDots');
+  const total = currentProblem.stepsNeeded;
+  const done = steps.filter(s => s.isCorrect).length;
+
+  let html = '';
+  for (let i = 0; i < total; i++) {
+    let cls = 'dot';
+    if (i < done) cls += ' done';
+    else if (i === done) cls += ' active';
+    html += `<div class="${cls}"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateEquationDisplay() {
+  document.getElementById('equationDisplay').innerHTML = currentEquation.getDisplayHTML();
+}
+
+function updateHintBar(msg, type) {
+  const bar = document.getElementById('hintBar');
+  bar.textContent = msg || '';
+  bar.className = 'hint-bar';
+  if (type === 'success') bar.classList.add('success');
+  if (type === 'error') bar.style.background = '#FFEBEB';
+}
+
+function updateOpsGrid() {
+  if (solved) {
+    document.getElementById('opsGrid').innerHTML = '';
+    return;
+  }
+
+  const correctOp = currentEquation.getCorrectOperation();
+  if (!correctOp) return;
+
+  const distractors = generateDistractors(correctOp, currentEquation);
+  operations = shuffle([correctOp, ...distractors]);
+
+  const grid = document.getElementById('opsGrid');
+  grid.innerHTML = '';
+
+  operations.forEach((op, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'op-btn';
+    btn.textContent = op.label;
+    btn.addEventListener('click', () => handleOperation(idx));
+    btn.id = 'opBtn' + idx;
+    grid.appendChild(btn);
+  });
+}
+
+function updateStepsList() {
+  const container = document.getElementById('stepsList');
+  if (steps.length === 0) {
+    container.innerHTML = '<div style="color:#C0B5A5;font-size:14px;">还没有操作，试试看吧！</div>';
+    return;
+  }
+  container.innerHTML = steps.map((s, i) => `
+    <div class="step-item">
+      <span class="step-num">${i + 1}</span>
+      <span>${s.label}</span>
+      <span class="step-arrow">→</span>
+      <span style="font-family:'Courier New',monospace;font-weight:600;">${s.resultStr}</span>
+      ${s.isCorrect ? '<span style="color:#6BBF59;">✓</span>' : '<span style="color:#E05555;">(非最优)</span>'}
+    </div>
+  `).join('');
+}
+
+function handleOperation(idx) {
+  if (solved) return;
+
+  const op = operations[idx];
+  const correctOp = currentEquation.getCorrectOperation();
+  const isCorrect = op.desc === correctOp.desc;
+
+  // Save state before operation
+  const beforeStr = currentEquation.getDisplayHTML().replace(/<[^>]*>/g, '');
+
+  // Apply operation
+  op.apply(currentEquation);
+
+  // Record step
+  const afterStr = currentEquation.getDisplayHTML().replace(/<[^>]*>/g, '');
+  steps.push({
+    label: op.label,
+    resultStr: afterStr,
+    isCorrect,
+    beforeStr
+  });
+
+  // Animate
+  kickBeam();
+
+  // Update UI
+  updateEquationDisplay();
+  updateStepsList();
+  updateProgressDots();
+  renderScale(currentEquation);
+
+  // Check feedback
+  if (isCorrect) {
+    updateHintBar('✅ 正确！这一步帮助我们更接近答案', 'success');
+  } else {
+    updateHintBar('🤔 这个操作数学上没问题，但不是最优的解法。试试其他操作？', 'error');
+  }
+
+  // Check if solved
+  const answer = currentEquation.isSolved();
+  if (answer !== null) {
+    solved = true;
+    document.getElementById('opsGrid').innerHTML = '';
+    setTimeout(() => showVictory(answer), 600);
+  } else {
+    // Update buttons for next step
+    setTimeout(updateOpsGrid, 400);
+  }
+
+  // Scroll steps to bottom
+  const stepsSection = document.querySelector('.steps-section');
+  stepsSection.scrollTop = stepsSection.scrollHeight;
+}
+
+function showVictory(answer) {
+  const overlay = document.getElementById('victoryOverlay');
+  document.getElementById('victoryAnswer').textContent = 'x = ' + answer;
+
+  // Star rating
+  const correctSteps = steps.filter(s => s.isCorrect).length;
+  const totalNeeded = currentProblem.stepsNeeded;
+
+  let stars;
+  if (correctSteps === totalNeeded && steps.length === totalNeeded) {
+    stars = '⭐⭐⭐';
+    updateHintBar('🏆 完美！你用最少的步骤解出了答案！', 'success');
+  } else if (correctSteps === totalNeeded) {
+    stars = '⭐⭐';
+    updateHintBar('🎉 很好！你成功解出了方程！', 'success');
+  } else {
+    stars = '⭐';
+    updateHintBar('👏 你解出来了！多练习就能找到最优解法', 'success');
+  }
+
+  document.getElementById('victoryStars').textContent = stars;
+  overlay.classList.add('show');
+
+  // Confetti
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8C32', '#C77DFF', '#FF6FB5', '#00C9A7'];
+
+  for (let i = 0; i < 80; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+    piece.style.animationDelay = Math.random() * 0.8 + 's';
+    piece.style.width = (8 + Math.random() * 10) + 'px';
+    piece.style.height = (6 + Math.random() * 10) + 'px';
+    container.appendChild(piece);
+
+    // Clean up
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ============ BUTTON HANDLERS ============
+
+document.getElementById('btnHint').addEventListener('click', () => {
+  if (solved) return;
+  hintUsed++;
+
+  const correctOp = currentEquation.getCorrectOperation();
+  const correctIdx = operations.findIndex(op => op.desc === correctOp.desc);
+
+  if (correctIdx >= 0) {
+    // Highlight the correct button
+    const btn = document.getElementById('opBtn' + correctIdx);
+    if (btn) {
+      btn.classList.add('hint-highlight');
+      setTimeout(() => btn.classList.remove('hint-highlight'), 2500);
+
+      // Briefly make it bigger
+      btn.style.transform = 'scale(1.06)';
+      setTimeout(() => { btn.style.transform = ''; }, 500);
+    }
+  }
+
+  updateHintBar(`💡 提示：试试 "${correctOp.label}"（第${hintUsed}次提示）`);
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  resetState();
+  currentEquation = currentProblem.eq.clone();
+  updateProgressDots();
+  updateEquationDisplay();
+  updateOpsGrid();
+  updateStepsList();
+  updateHintBar('🔄 已重置，再试一次吧！');
+  renderScale(currentEquation);
+  document.getElementById('victoryOverlay').classList.remove('show');
+});
+
+document.getElementById('btnNext').addEventListener('click', loadProblem);
+document.getElementById('btnVictoryNext').addEventListener('click', loadProblem);
+
+// ============ ANIMATION LOOP ============
+
+function gameLoop() {
+  updateBeam();
+  if (currentEquation) {
+    renderScale(currentEquation);
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+// ============ INIT ============
+
+function initialDraw() {
+  // Draw initial empty scale or load first problem
+  loadProblem();
+}
+
+initialDraw();
+gameLoop();
+
+console.log('🎓 天平学方程 - 互动教程已就绪！');
+console.log('  ⚖️  用天平理解等式');
+console.log('  🎯  选择正确的操作来解方程');
+console.log('  🎉  解出方程获得星星奖励');
+</script>
+
+</body>
+</html>
